@@ -34,8 +34,9 @@ const Dashboard = () => {
             } = await supabase.auth.getUser();
 
             if (userError || !user) {
-                setMessage("User not authenticated");
-                setShowPopup(true);
+                // setMessage("User not authenticated");
+                // setShowPopup(true);
+                setError("User not authenticated");
                 navigate("/login");
                 return;
             }
