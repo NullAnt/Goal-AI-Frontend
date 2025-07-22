@@ -8,7 +8,7 @@ import GeneratedRoutine from '../components/GeneratedRoutine';
 
 const Dashboard = () => {
   const [goal, setGoal] = useState("");
-  const [routine, setRoutine] = useState(null);
+  const [routine, setRoutine] = useState(null); // generated routine
   const [approved, setApproved] = useState(null);
   const [error, setError] = useState(null);
   const [connected, setConnected] = useState(false);
@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [waiting, setWaiting] = useState(false);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [savedRoutine, setSavedRoutine] = useState(null); // routine from supabase
 
   const textareaRef = useRef(null);
   const socketRef = useRef(null);
@@ -41,23 +42,51 @@ const Dashboard = () => {
 
             setUser(user);
 
-            // Returns display_name and avatar_url from profiles table where id matches user.id
             const { data: profileData } = await supabase
                 .from("profiles")
-                .select("gender, age")
+                .select("email, gender, age, routine")
                 .eq("id", user.id)
                 .maybeSingle();
 
             setProfile(profileData || null);
+
+            // Update email in profiles table if not matching
+            if (profileData && user.email && profileData.email !== user.email) {
+                await supabase
+                    .from("profiles")
+                    .update({ email: user.email })
+                    .eq("id", user.id);
+            }
+
+            // Only update savedRoutine here
+            if (profileData && profileData.routine) {
+                setSavedRoutine(profileData.routine);
+            } else {
+                setSavedRoutine(null);
+            }
+            setLoading(false);
         };
         fetchProfile();
 
-        // fetchUserProfile is called on auth state change
         const { data: listener } = supabase.auth.onAuthStateChange(() => {
             fetchProfile();
         });
     }, []);
 
+    // Remove the effect that updates supabase on every routine change
+    // useEffect(() => {
+    //     // Only update if user exists and routine is an array
+    //     if (user && Array.isArray(routine)) {
+    //         supabase
+    //             .from("profiles")
+    //             .update({ routine })
+    //             .eq("id", user.id);
+    //     }
+    // }, [routine, user]);
+
+
+
+    
   // useEffect(() => {
   //   // Connect to WebSocket server
   //   socketRef.current = new WebSocket("ws://localhost:8000/ws");
@@ -138,7 +167,17 @@ const Dashboard = () => {
     }
   };
 
-  
+  const handleRoutineApproval = async (routineToSave) => {
+    if (user && Array.isArray(routineToSave)) {
+        await supabase
+            .from("profiles")
+            .update({ routine: routineToSave })
+            .eq("id", user.id);
+        setSavedRoutine(routineToSave);
+    }
+    setRoutine(null); // clear generated routine after saving
+    setApproved(true);
+};
 
   return (
 
@@ -147,7 +186,6 @@ const Dashboard = () => {
         <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
           Goal-Based AI Planner
         </h1>
-
         <textarea
           className="w-full p-4 border rounded-lg mb-4 text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           ref={textareaRef}
@@ -155,19 +193,69 @@ const Dashboard = () => {
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
         />
-
         <button
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-lg font-semibold transition"
           onClick={sendGoal}
-        //   disabled={!connected}
           disabled={waiting}
         >
           {waiting ? "Submitting..." : "Submit Goal"}
         </button>
-
         {error && <p className="text-red-500 mt-4">{error}</p>}
 
-        {routine && (<GeneratedRoutine routineState={[routine, setRoutine]} approvedState={[approved, setApproved]} />)}
+        {/* Pass approval handler to GeneratedRoutine */}
+        {routine && (
+          <GeneratedRoutine
+            routineState={[routine, setRoutine]}
+            approvedState={[approved, setApproved]}
+            onApprove={handleRoutineApproval}
+          />
+        )}
+
+        {/* Saved routine section */}
+        <div className="mt-10">
+          <h2 className="text-xl font-bold mb-4 text-gray-700">Your Saved Routine</h2>
+          {savedRoutine && Array.isArray(savedRoutine) && savedRoutine.length > 0 ? (
+            <div className="bg-gray-100 p-4 rounded-lg text-sm mb-4">
+              <div className="flex font-semibold text-gray-600 mb-2 px-1">
+                <div className="flex-1 flex flex-row items-center">
+                  <span className="w-24 mr-2">Time</span>
+                  <span className="flex-1 mr-2">Message</span>
+                  <span className="w-16 flex items-center justify-center">Notify</span>
+                </div>
+              </div>
+              <ul className="space-y-2">
+                {savedRoutine.map((item, idx) => (
+                  <li key={idx} className="flex flex-col sm:flex-row sm:items-center">
+                    <div className="flex-1 flex flex-col sm:flex-row sm:items-center">
+                      <span className="w-24 font-semibold text-blue-700 mr-2">{item.time}</span>
+                      <span className="flex-1 text-gray-800 mr-2">{item.message}</span>
+                    </div>
+                    <div className="w-16 flex items-center justify-center mt-2 sm:mt-0 sm:ml-auto">
+                      <input type="checkbox" checked={item.notify} readOnly />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-gray-500">No routine saved.</p>
+          )}
+          <button
+            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-semibold"
+            onClick={async () => {
+              if (user) {
+                await supabase
+                  .from("profiles")
+                  .update({ routine: null })
+                  .eq("id", user.id);
+                setSavedRoutine(null);
+              }
+            }}
+            disabled={!savedRoutine}
+          >
+            Delete Routine
+          </button>
+        </div>
       </div>
     </div>
   );
