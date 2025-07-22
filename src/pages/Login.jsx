@@ -75,7 +75,7 @@ const Login = () => {
                 name="email"
                 type="email"
                 {...register("email", { required: "This field is required" })}
-                className="w-full text-gray-100 text-lg border border-gray-600 bg-gray-700 px-4 py-3 rounded-lg outline-none transition-all duration-200 ease-in-out placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                className="w-full text-gray-100 text-lg border border-gray-600 bg-gray-700 px-4 py-3 rounded-lg outline-none transition-all duration-200 ease-in-out placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500"
                 placeholder="Enter Email"
               />
               {errors.email && (

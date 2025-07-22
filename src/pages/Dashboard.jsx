@@ -194,7 +194,7 @@ const Dashboard = () => {
         </p>
         <div className="mb-6">
           <textarea
-            className="w-full p-4 sm:p-5 border border-gray-600 rounded-xl mb-4 text-lg text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-in-out resize-y min-h-[120px]"
+            className="w-full p-4 sm:p-5 border border-gray-600 rounded-xl mb-4 text-lg text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 ease-in-out resize-y min-h-[120px]"
             ref={textareaRef}
             placeholder="E.g., I want to run a marathon in 6 months, I need a 30-day weight loss plan, or I want to build muscle mass and strength."
             value={goal}

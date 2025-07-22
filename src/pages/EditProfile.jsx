@@ -216,18 +216,18 @@ const EditProfile = () => {
 
   };
 
-  if (loading) {
+  if (loading && !user) {
     return (
-      <div className="flex flex-col items-center mt-8">
-        <h2 className="text-4xl font-bold mb-2 mt-4 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
+        <h2 className="text-4xl font-bold mb-2 text-center text-gray-100">
           Account Settings
         </h2>
         <p className="mb-8 text-center text-xl text-gray-400">
           Manage your account.
         </p>
-        <div className="max-w-3xl w-full mx-auto p-10 bg-[#172133] text-white rounded-xl shadow-lg border border-[#324154] flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-600 border-t-white mb-6"></div>
-          <div className="text-lg text-gray-200">Fetching profile...</div>
+        <div className="max-w-3xl w-full mx-auto p-10 bg-gray-800 text-white rounded-xl shadow-lg border border-gray-700 flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mb-6"></div>
+          <div className="text-lg text-gray-300">Fetching profile...</div>
         </div>
       </div>
     );
@@ -236,17 +236,16 @@ const EditProfile = () => {
 
 
   return (
-    <div className="flex flex-col items-center mt-8">
-      <h2 className="text-4xl font-bold mb-2 mt-4 text-center">
+    <div className="min-h-screen flex flex-col items-center py-12 px-4 bg-gray-900 text-white">
+      <h2 className="text-5xl font-extrabold mb-4 text-center text-gray-100">
         Account Settings
       </h2>
-      <p className="mb-8 text-center text-xl text-gray-400">
+      <p className="mb-10 text-center text-xl text-gray-400">
         Manage your account.
       </p>
-      <div className="max-w-3xl w-full mx-auto mt-10 p-10 bg-[#172133] text-white rounded-xl shadow-lg border" style={{ borderColor: "#324154" }}>
-        <div className="flex flex-col mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full overflow-hidden mb-2">
+      <div className="max-w-4xl w-full mx-auto p-8 sm:p-10 bg-gray-800 text-white rounded-2xl shadow-2xl border border-gray-700" style={{ borderColor: "#324154" }}>
+        <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 pb-8 border-b border-gray-700">
+          <div className="w-28 h-28 rounded-full overflow-hidden flex-shrink-0 border-4 border-purple-500 shadow-lg">
               {profilePic ? (
                 <img
                   src={profilePic}
@@ -254,34 +253,42 @@ const EditProfile = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gray-600 flex items-center justify-center text-2xl text-white rounded-full">
-                  <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <div className="w-full h-full bg-gray-700 flex items-center justify-center text-gray-400">
+                  <svg className="h-20 w-20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </div>
               )}
             </div>
-            <label className="bg-gray-700 text-lg px-3 py-1 rounded hover:bg-gray-600 cursor-pointer mb-1">
-              Upload profile picture
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleUpload}
-              />
-            </label>
+            <div className="flex flex-col items-center sm:items-start">
+              <h3 className="text-2xl font-bold text-gray-100 mb-2">Profile Avatar</h3>
+              <label htmlFor="profile-picture-upload" className="inline-flex items-center bg-purple-600 text-white px-5 py-2 rounded-lg cursor-pointer hover:bg-purple-700 transition-colors duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+                Upload profile picture
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleUpload}
+                  disabled={loading}
+                />
+              </label>
+              {loading && (
+              <p className="text-gray-400 text-sm mt-2 flex items-center">
+                <span className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-purple-400 mr-2"></span>
+                Uploading...
+              </p>
+              )}
           </div>
         </div>
 
-        <div className="space-y-4">
-          <InputField label="Display Name *" name="display_name" value={formData.display_name} onChange={handleChange} icon={<User size={18} />} />
-          <InputField label="Email" name="email" value={user?.email || ""} onChange={() => {}} readOnly icon={<Mail size={18} />} />
-          <TextAreaField label="Bio" name="bio" value={formData.bio} onChange={handleChange} />
-          <InputField label="Gender" name="gender" value={formData.gender} onChange={handleChange} placeholder="Male/Female/Other" icon={<VenusAndMars size={18} />} error={errors.gender} />
-          <InputField label="Age" name="age" value={formData.age} onChange={handleChange} placeholder="Your age" icon={<Calendar size={18} />} error={errors.age} />
-          
+        <div className="space-y-6">
+          <InputField label="Display Name" name="display_name" value={formData.display_name} onChange={handleChange} icon={<User size={20} error={errors.display_name} placeholder="Your public name" required/>} />
+          <InputField label="Email" name="email" value={user?.email || ""} onChange={() => {}} readOnly icon={<Mail size={20} />} />
+          <TextAreaField label="Bio" name="bio" value={formData.bio} onChange={handleChange} placeholder="Tell us a little about yourself (e.g., interests, profession)"/>
+          <InputField label="Gender" name="gender" value={formData.gender} onChange={handleChange} placeholder="Male/Female/Other" icon={<VenusAndMars size={20} />} error={errors.gender} />
+          <InputField label="Age" name="age" value={formData.age} onChange={handleChange} placeholder="Your age" icon={<Calendar size={20} />} error={errors.age} type="number"/>
         </div>
 
-        <button onClick={updateProfile} className="mt-8 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded shadow" disabled={loading}>
-          {loading ? "Saving..." : "Update Profile"}
+        <button onClick={updateProfile} className="mt-10 w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800" disabled={loading}>
+          {loading ? "Saving Profile..." : "Update Profile"}
         </button>
       </div>
 
@@ -304,41 +311,48 @@ const InputField = ({
   placeholder = "",
   icon,
   error,
+  type = "text",
+  required = false,
 }) => (
   <div>
-    <label className="block mb-1 text-lg text-gray-300 font-semibold">
+    <label htmlFor={name} className="block mb-2 text-lg text-gray-300 font-medium">
       {label}
+      {required && <span className="text-red-400 ml-1">*</span>}
     </label>
-    <div className="flex items-center bg-gray-800 border border-gray-700 rounded-lg px-5 py-3 focus-within:ring-2 focus-within:ring-blue-500">
-      {icon && <span className="mr-3 text-gray-400 text-lg">{icon}</span>}
+    <div className={`flex items-center bg-gray-700 border border-gray-600 rounded-xl px-5 py-3 transition-all duration-200 ease-in-out ${
+        readOnly ? "opacity-70" : "focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500"
+      }`}>
+      {icon && <span className="mr-4 text-gray-400 text-xl">{icon}</span>}
       <input
-        type="text"
+        id={name}
+        type={type}
         name={name}
         value={value}
         onChange={onChange}
         readOnly={readOnly}
         placeholder={placeholder}
-        className={`flex-1 bg-transparent outline-none text-white placeholder:text-base placeholder:text-gray-400 ${
-          readOnly ? "opacity-60 cursor-not-allowed" : ""
+        className={`flex-1 bg-transparent outline-none text-white placeholder:text-gray-400 text-lg ${
+          readOnly ? "cursor-not-allowed" : ""
         }`}
       />
     </div>
-    {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
+    {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
   </div>
 );
 
-const TextAreaField = ({ label, name, value, onChange }) => (
+const TextAreaField = ({ label, name, value, onChange, placeholder = "" }) => (
   <div>
-    <label className="block mb-1 text-lg text-gray-300 font-bold">
+    <label htmlFor={name} className="block mb-2 text-lg text-gray-300 font-medium">
       {label}
     </label>
     <textarea
+      id={name}
       name={name}
       value={value}
       onChange={onChange}
       rows={3}
-      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-base placeholder:text-gray-400"
-      placeholder="Write a few sentences about yourself."
+      className="w-full bg-gray-700 border border-gray-600 rounded-xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 placeholder:text-gray-400 text-lg transition-all duration-200 ease-in-out"
+      placeholder={placeholder}
     />
   </div>
 );
