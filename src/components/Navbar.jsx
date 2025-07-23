@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
+import logo from "/logo.svg"; // Add this import
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
@@ -71,18 +72,18 @@ const Navbar = () => {
   if (loading) {
     return (
       <nav className="bg-gray-900 text-white sticky top-0 z-50 border-b border-gray-700 shadow-lg">
-        <div className="max-w-screen-xl flex justify-between items-center mx-auto p-4">
+        <div className="max-w-screen-xl flex justify-between items-center mx-auto p-2 sm:p-3">
           <NavLink
             to="/"
             className="flex items-center space-x-2 sm:space-x-3"
             aria-label="Go to Home"
           >
             <img
-              src="/vite.svg"
-              className="h-8 sm:h-10"
+              src={logo} // Use imported logo
+              className="h-7 sm:h-8"
               alt="logo"
             />
-            <span className="text-2xl sm:text-3xl font-extrabold text-purple-400">
+            <span className="text-2xl sm:text-3xl font-extrabold text-white-400">
               GoalAI
             </span>
           </NavLink>
@@ -97,15 +98,15 @@ const Navbar = () => {
 
   return (
     <nav className="bg-gray-900 text-white sticky top-0 z-50 border-b border-gray-700 shadow-lg">
-      <div className="max-w-screen-xl flex justify-between items-center mx-auto p-4 sm:p-6">
+      <div className="max-w-screen-xl flex justify-between items-center mx-auto p-2 sm:p-3">
         <NavLink
           to="/"
           className="flex items-center space-x-2 sm:space-x-3 transition-transform duration-200 hover:scale-105"
           aria-label="Go to Home"
-          >
+        >
           <img
-            src="/logo.svg"
-            className="h-8 sm:h-10"
+            src={logo} // Use imported logo
+            className="h-7 sm:h-8"
             alt="logo"
           />
           <span className="text-2xl sm:text-3xl font-extrabold text-white-400">
