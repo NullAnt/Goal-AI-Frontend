@@ -17,6 +17,8 @@ const Dashboard = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [savedRoutine, setSavedRoutine] = useState(null); // routine from supabase
+  const [editMode, setEditMode] = useState(false);
+  const [editRoutine, setEditRoutine] = useState(null);
 
   const textareaRef = useRef(null);
   const socketRef = useRef(null);
@@ -182,6 +184,36 @@ const Dashboard = () => {
     setApproved(true);
 };
 
+  const handleEditRoutine = () => {
+    setEditRoutine(savedRoutine ? JSON.parse(JSON.stringify(savedRoutine)) : null);
+    setEditMode(true);
+  };
+
+  const handleEditNotifyChange = (idx, checked) => {
+    setEditRoutine(prev =>
+      prev.map((item, i) =>
+        i === idx ? { ...item, notify: checked } : item
+      )
+    );
+  };
+
+  const handleSaveRoutineChanges = async () => {
+    if (user && Array.isArray(editRoutine)) {
+      await supabase
+        .from("profiles")
+        .update({ routine: editRoutine })
+        .eq("id", user.id);
+      setSavedRoutine(editRoutine);
+    }
+    setEditMode(false);
+    setEditRoutine(null);
+  };
+
+  const handleDiscardRoutineChanges = () => {
+    setEditMode(false);
+    setEditRoutine(null);
+  };
+
   return (
 
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center py-12 px-4">
@@ -241,28 +273,62 @@ const Dashboard = () => {
               Your Saved Routine
             </h2>
             {savedRoutine && Array.isArray(savedRoutine) && savedRoutine.length > 0 ? (
-              <div className="bg-gray-900 p-4 rounded-xl text-base mb-6 shadow-lg border border-gray-700">
-                <div className="flex font-semibold text-purple-300 mb-4 px-1 text-lg">
-                  <div className="flex-1 flex flex-row items-center">
-                    <span className="w-24 mr-2">Time</span>
-                    <span className="flex-1 mr-2">Message</span>
-                    <span className="w-16 flex items-center justify-center">Notify</span>
-                  </div>
+              <>
+                <div className="flex justify-center mb-4">
+                  {!editMode && (
+                    <button
+                      className="w-40 mx-auto bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+                      onClick={handleEditRoutine}
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
-                <ul className="space-y-3">
-                  {savedRoutine.map((item, idx) => (
-                    <li key={idx} className="flex flex-col sm:flex-row sm:items-center bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-700">
-                      <div className="flex-1 flex flex-col sm:flex-row sm:items-center">
-                        <span className="w-24 font-semibold text-purple-400 mr-2">{item.time}</span>
-                        <span className="flex-1 text-white mr-2">{item.message}</span>
-                      </div>
-                      <div className="w-16 flex items-center justify-center mt-2 sm:mt-0 sm:ml-auto">
-                        <input type="checkbox" checked={item.notify} readOnly className="accent-purple-500 h-5 w-5" />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                <div className="bg-gray-900 p-4 rounded-xl text-base mb-6 shadow-lg border border-gray-700">
+                  <div className="flex font-semibold text-purple-300 mb-4 px-1 text-lg">
+                    <div className="flex-1 flex flex-row items-center">
+                      <span className="w-24 mr-2">Time</span>
+                      <span className="flex-1 mr-2">Message</span>
+                      <span className="w-16 flex items-center justify-center">Notify</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-3">
+                    {(editMode ? editRoutine : savedRoutine).map((item, idx) => (
+                      <li key={idx} className="flex flex-col sm:flex-row sm:items-center bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-700">
+                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center">
+                          <span className="w-24 font-semibold text-purple-400 mr-2">{item.time}</span>
+                          <span className="flex-1 text-white mr-2">{item.message}</span>
+                        </div>
+                        <div className="w-16 flex items-center justify-center mt-2 sm:mt-0 sm:ml-auto">
+                          <input
+                            type="checkbox"
+                            checked={item.notify}
+                            readOnly={!editMode}
+                            className="accent-purple-500 h-5 w-5"
+                            onChange={editMode ? (e) => handleEditNotifyChange(idx, e.target.checked) : undefined}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {editMode && (
+                  <div className="flex gap-4 justify-end">
+                    <button
+                      className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200"
+                      onClick={handleSaveRoutineChanges}
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200"
+                      onClick={handleDiscardRoutineChanges}
+                    >
+                      Discard Changes
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="bg-gray-900 p-6 rounded-xl text-center text-gray-400 shadow-lg border border-gray-700">
                 <svg className="w-10 h-10 mx-auto mb-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,6 +350,8 @@ const Dashboard = () => {
                     .update({ routine: null })
                     .eq("id", user.id);
                   setSavedRoutine(null);
+                  setEditMode(false);
+                  setEditRoutine(null);
                 }
               }}
               disabled={!savedRoutine}
